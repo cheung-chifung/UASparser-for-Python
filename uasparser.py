@@ -126,8 +126,8 @@ class UASparser:
                         ret[ua_index[i-1]] = ( 'ua_icon' in entire_url and self.ua_img_url or "%s") % test[i]
                     elif i==7:
                         if test[7]: #OS detail
-                            for j in range(1,len(data['os'][int(test[7])])):
-                                ret[os_index[j]] = data['os'][int(test[7])][j]
+                            for j in range(1,len(data['os'][test[7]])):
+                                ret[os_index[j]] = data['os'][test[7]][j]
                     elif i==8:
                         ret[ua_index[i-1]] = ''.join([self.info_url,test[i]])
                 
@@ -139,7 +139,7 @@ class UASparser:
             test = data['browser_reg'][index]
             test_rg = toPythonReg(test[0]).findall(useragent) #All regular expression should be in python format
             if test_rg:
-                id_browser = int(test[1]) #Bingo
+                id_browser = test[1] #Bingo
                 info = test_rg[0]
                 break
 
@@ -159,7 +159,7 @@ class UASparser:
                 pass
             
             try:
-                ret['typ'] = data['browser_type'][int(data['browser'][id_browser][0])][0]
+                ret['typ'] = data['browser_type'][data['browser'][id_browser][0]][0]
                 ret['ua_name'] = "%s %s" % ( data['browser'][id_browser][1], info )
             except:
                 pass
@@ -183,7 +183,7 @@ class UASparser:
             test = data['os_reg'][index]
             test_rg = toPythonReg(test[0]).match(useragent)
             if test_rg:
-                os_id = int(test[1])
+                os_id = test[1]
                 break
 
         # Get OS detail
@@ -209,10 +209,10 @@ class UASparser:
         for line in file.split("\n"):
             option = option_pat.findall(line)
             if option: #do something for option
-                if data[current_section].has_key(int(option[0][0])):
-                    data[current_section][int(option[0][0])].append(option[0][1])
+                if data[current_section].has_key(option[0][0]):
+                    data[current_section][option[0][0]].append(option[0][1])
                 else:
-                    data[current_section][int(option[0][0])] = [option[0][1],]
+                    data[current_section][option[0][0]] = [option[0][1],]
             else:
                 section = section_pat.findall(line) #do something for section
                 if section:

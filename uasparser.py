@@ -2,8 +2,10 @@
 A python interface to http://user-agent-string.info/
 A python version of http://user-agent-string.info/download/UASparser
 
-By Hicro Kee (http://hicrokee.com)
-email: hicrokee AT gmail DOT com
+By Chifung Cheung <http://keekun.com>
+email: Chifung.Cheung AT gmail DOT com
+
+modified by Michal Molhanec <http://molhanec.net>
 
 Usage:
 
@@ -115,7 +117,7 @@ class UASparser:
         data = self.loadData()
         
         #Is it a spider?
-        for index in data['robots']:
+        for index in data['robots']['order']:
             test = data['robots'][index]
             if test[0] == useragent:
                 ret['typ'] = 'Robot'
@@ -135,7 +137,7 @@ class UASparser:
         
         #A browser
         id_browser = None
-        for index in data['browser_reg']:
+        for index in data['browser_reg']['order']:
             test = data['browser_reg'][index]
             test_rg = toPythonReg(test[0]).findall(useragent) #All regular expression should be in python format
             if test_rg:
@@ -180,7 +182,7 @@ class UASparser:
         #Try to match an OS
         os_id = None  
         for index in data['os_reg']:
-            test = data['os_reg'][index]
+            test = data['os_reg'][index]['order'];
             test_rg = toPythonReg(test[0]).findall(useragent)
             if test_rg:
                 os_id = int(test[1])
@@ -209,15 +211,17 @@ class UASparser:
         for line in file.split("\n"):
             option = option_pat.findall(line)
             if option: #do something for option
-                if data[current_section].has_key(int(option[0][0])):
-                    data[current_section][int(option[0][0])].append(option[0][1])
+                key = int(option[0][0])
+                if data[current_section].has_key(key):
+                    data[current_section][key].append(option[0][1])
                 else:
-                    data[current_section][int(option[0][0])] = [option[0][1],]
+                    data[current_section][key]     = [option[0][1],]
+                    data[current_section]['order'].append(key)
             else:
                 section = section_pat.findall(line) #do something for section
                 if section:
                     current_section = section[0]
-                    data[current_section] = {}
+                    data[current_section] = {'order':[]}
         return data
     
     def _fetchURL(self,url):

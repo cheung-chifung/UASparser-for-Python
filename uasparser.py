@@ -13,7 +13,7 @@ from uasparser import UASparser
 
 uas_parser = UASparser('/path/to/your/cache/folder')
 
-result = uas_parser.parse('YOUR_USERAGENT_STRING',entire_url='ua_icon,os_icon') #only 'ua_icon' or 'os_icon' or both are allowed in entire_url 
+result = uas_parser.parse('YOUR_USERAGENT_STRING',entire_url='ua_icon,os_icon') #only 'ua_icon' or 'os_icon' or both are allowed in entire_url
 
 
 Examples:
@@ -49,18 +49,18 @@ class UASException(Exception):
     pass
 
 class UASparser:
-    
+
     ini_url  = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini'
     ver_url  = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y'
     info_url = 'http://user-agent-string.info'
     os_img_url = 'http://user-agent-string.info/pub/img/os/%s'
     ua_img_url = 'http://user-agent-string.info/pub/img/ua/%s'
 
-    cache_file_name = 'cache' 
+    cache_file_name = 'cache'
     cache_dir = ''
     cache_data = None
     update_interval = 3600*24*10 # 10 days
-    
+
     def __init__(self,cache_dir=None):
         """
         Create an UASparser to parse useragent strings.
@@ -70,7 +70,7 @@ class UASparser:
         if not os.access(self.cache_dir, os.W_OK):
             raise UASException("Cache directory %s is not writable.")
         self.cache_file_name = os.path.join( self.cache_dir, self.cache_file_name)
-    
+
     def parse(self,useragent,entire_url=''):
         """
         Get the information of an useragent string
@@ -94,28 +94,28 @@ class UASparser:
                'os_company_url':'unknown',
                'os_icon':'unknown.png',
                }
-        
+
         os_index = ['os_family','os_name','os_url','os_company','os_company_url','os_icon']
         ua_index = ['ua_family','ua_name','ua_url','ua_company','ua_company_url','ua_icon','','ua_info_url']
-        
+
         if 'ua_icon' in entire_url: ret['ua_icon'] = self.ua_img_url % ret['ua_icon']
         if 'os_icon' in entire_url: ret['os_icon'] = self.os_img_url % ret['os_icon']
-        
+
         def toPythonReg(reg):
             reg_l = reg[1:reg.rfind('/')] # modify the re into python format
             reg_r = reg[reg.rfind('/')+1:]
             flag = 0
             if 's' in reg_r: flag = flag | re.S
             if 'i' in reg_r: flag = flag | re.I
-            return re.compile(reg_l,flag)            
-        
+            return re.compile(reg_l,flag)
+
         #Check argument
         if not useragent:
             raise UASException("Excepted argument useragent is not given.")
-        
+
         #Load cache data
         data = self.loadData()
-        
+
         #Is it a spider?
         for index in data['robots']['order']:
             test = data['robots'][index]
@@ -132,9 +132,9 @@ class UASparser:
                                 ret[os_index[j]] = data['os'][int(test[7])][j]
                     elif i==8:
                         ret[ua_index[i-1]] = ''.join([self.info_url,test[i]])
-                
+
                 return ret
-        
+
         #A browser
         id_browser = None
         for index in data['browser_reg']['order']:
@@ -159,13 +159,13 @@ class UASparser:
                             ret[_index[i-1]] = "".join([self.info_url,data['browser'][id_browser][i]])
             except:
                 pass
-            
+
             try:
                 ret['typ'] = data['browser_type'][int(data['browser'][id_browser][0])][0]
                 ret['ua_name'] = "%s %s" % ( data['browser'][id_browser][1], info )
             except:
                 pass
-        
+
         # Get OS detail
         if data['browser_os'].has_key(id_browser):
             try:
@@ -178,9 +178,9 @@ class UASparser:
                 return ret
             except:
                 pass
-        
+
         #Try to match an OS
-        os_id = None  
+        os_id = None
         for index in data['os_reg']:
             test = data['os_reg'][index]['order'];
             test_rg = toPythonReg(test[0]).findall(useragent)
@@ -189,24 +189,24 @@ class UASparser:
                 break
 
         # Get OS detail
-        if os_id and data['os'].has_key(os_id): 
+        if os_id and data['os'].has_key(os_id):
             for i in range(0,len(data['os'][os_id])):
                 if i<5:
                     ret[os_index[i]] = data['os'][os_id][i]
                 else:
                     ret[os_index[i]] = ( 'os_icon' in entire_url and self.os_img_url or "%s") % data['os'][os_id][i]
-                    
-        return ret   
-    
+
+        return ret
+
     def _parseIniFile(self,file):
         """
         Parse an ini file into a dictionary structure
         """
         data = {}
-        current_section = 'unknown'        
+        current_section = 'unknown'
         section_pat = re.compile(r'^\[(\S+)\]$')
         option_pat = re.compile(r'^(\d+)\[\]\s=\s"(.*)"$')
-        
+
         #step by line
         for line in file.split("\n"):
             option = option_pat.findall(line)
@@ -223,7 +223,7 @@ class UASparser:
                     current_section = section[0]
                     data[current_section] = {'order':[]}
         return data
-    
+
     def _fetchURL(self,url):
         """
         Get remote context by a given url
@@ -231,7 +231,7 @@ class UASparser:
         resq = urllib2.Request(url)
         context = urllib2.urlopen(resq)
         return context.read()
-    
+
     def _checkCache(self):
         """
         check whether the cache available or not?
@@ -245,13 +245,13 @@ class UASparser:
                 return False
 
         return True
-    
+
     def updateData(self):
         """
         Check whether data is out-of-date
         """
         ver_data = None
-        
+
         #Check the latest version first
         #pass if no need to update
         try:
@@ -263,7 +263,7 @@ class UASparser:
                     return True
         except:
             raise UASException("Failed to get version of lastest data")
-        
+
         try:
             cache_file = open(self.cache_file_name,'wb')
             ini_file = self._fetchURL(self.ini_url)
@@ -272,11 +272,11 @@ class UASparser:
                 ini_data['version'] = ver_data
         except:
             raise UASException("Failed to download cache data")
-        
+
         pickle.dump(ini_data, cache_file)
-            
+
         return True
-        
+
     def loadData(self):
         """
         start to load cache data
@@ -286,9 +286,9 @@ class UASparser:
         else:
             if self.cache_data: #no need to load
                 return self.cache_data
-                
+
         self.cache_data = pickle.load(open(self.cache_file_name,'rb'))
-        
+
         return self.cache_data
 
 #simple test

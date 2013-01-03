@@ -182,7 +182,7 @@ class UASparser:
         #Try to match an OS
         os_id = None
         for index in data['os_reg']:
-            test = data['os_reg'][index]['order'];
+            test = data['os_reg'][index]
             test_rg = toPythonReg(test[0]).findall(useragent)
             if test_rg:
                 os_id = int(test[1])

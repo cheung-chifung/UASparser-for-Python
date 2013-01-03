@@ -1,2 +1,5 @@
-/cache
 *.pyc
+/build
+/cache
+/dist
+*.egg-info

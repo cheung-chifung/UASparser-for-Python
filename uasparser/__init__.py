@@ -299,7 +299,3 @@ class UASparser(object):
         self.cache_data = pickle.load(open(self.cache_file_name, 'rb'))
 
         return self.cache_data
-
-#simple test
-#uas = UASparser()
-#print uas.parse('SonyEricssonK750i/R1L Browser/SEMC-Browser/4.2 Profile/MIDP-2.0 Configuration/CLDC-1.1','os_icon')
